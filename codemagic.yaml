@@ -17,4 +17,4 @@ workflows:
           cp -r build/ios/iphoneos/Runner.app build/ios/Payload/
           cd build/ios && zip -qry ../smoke_free_app_unsigned.ipa Payload
     artifacts:
-      - smoke_free_app/build/ios/smoke_free_app_unsigned.ipa
+      - smoke_free_app/build/smoke_free_app_unsigned.ipa
