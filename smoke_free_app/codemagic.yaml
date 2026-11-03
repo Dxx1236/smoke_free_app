@@ -1,0 +1,30 @@
+# Codemagic 云端打包配置（路线 B：输出未签名 IPA，供 Windows 上的 Sideloadly 免费 Apple ID 签名侧载）
+# 把本文件放在仓库根目录，Codemagic 会自动识别。
+
+workflows:
+  ios-unsigned:
+    name: iOS 未签名打包
+    # 用 Mac 机器构建（免费额度每月 500 分钟，本项目一次约 10-15 分钟）
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      flutter: stable
+      xcode: latest
+    scripts:
+      # 1. 生成本仓库缺失的 iOS 工程骨架（源码里只有 lib/ 和配置，平台目录由 create 生成）
+      - flutter create . --org com.example --project-name smoke_free_app
+      # 2. 拉取依赖
+      - flutter packages pub get
+      # 3. 构建 iOS（不签名）
+      - flutter build ios --release --no-codesign
+      # 4. 把 Runner.app 打成未签名 IPA（Payload 结构）
+      - mkdir -p build/ios/Payload
+      - cp -r build/ios/iphoneos/Runner.app build/ios/Payload/
+      - cd build/ios && zip -qry ../smoke_free_app_unsigned.ipa Payload
+    artifacts:
+      - build/ios/smoke_free_app_unsigned.ipa
+    publishing:
+      email:
+        recipients:
+          - 你的邮箱@example.com   # ← 改成你自己的邮箱，打包完成会收到通知
+        notify: true
